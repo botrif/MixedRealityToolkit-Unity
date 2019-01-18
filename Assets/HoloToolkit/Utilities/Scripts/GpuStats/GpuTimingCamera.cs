@@ -26,7 +26,10 @@ namespace MixedRealityToolkit.Utilities
 
         private void OnPreCull()
         {
-            NewGpuFrameTime?.Invoke((float)GpuStats.GetSampleTime(TimingTag));
+            if (NewGpuFrameTime != null)
+            {
+                NewGpuFrameTime.Invoke((float)GpuStats.GetSampleTime(TimingTag));
+            }
         }
 
         protected void OnPreRender()
