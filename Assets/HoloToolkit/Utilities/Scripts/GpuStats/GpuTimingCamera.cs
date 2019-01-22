@@ -26,26 +26,35 @@ namespace MixedRealityToolkit.Utilities
 
         private void OnPreCull()
         {
-            if (NewGpuFrameTime != null)
-            {
-                NewGpuFrameTime.Invoke((float)GpuStats.GetSampleTime(TimingTag));
-            }
+            NewGpuFrameTime?.Invoke((float)GpuStats.GetSampleTime(TimingTag));
         }
 
         protected void OnPreRender()
         {
-            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Left || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono)
+#if UNITY_EDITOR
+            GpuStats.BeginSample(TimingTag);
+#else
+            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Left
+                || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono
+                || (UnityEngine.XR.XRSettings.enabled && UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes))
             {
                 GpuStats.BeginSample(TimingTag);
             }
+#endif
         }
 
         protected void OnPostRender()
         {
-            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono)
+#if UNITY_EDITOR
+            GpuStats.EndSample();
+#else
+            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right
+                || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono
+                || (UnityEngine.XR.XRSettings.enabled && UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes))
             {
                 GpuStats.EndSample();
             }
+#endif
         }
     }
 }
