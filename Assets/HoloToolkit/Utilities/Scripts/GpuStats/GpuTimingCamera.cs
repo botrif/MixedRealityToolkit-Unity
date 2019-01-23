@@ -5,10 +5,12 @@ namespace MixedRealityToolkit.Utilities
 {
     using System;
     using UnityEngine;
+    using UnityEngine.Rendering;
+    using UnityEngine.XR;
 
     /// <summary>
     /// Tracks the GPU time spent rendering a camera.
-    /// For stereo rendering sampling is made from the beginning of the left eye to the end of the right eye.
+    /// For multi-pass stereo rendering, sampling is made from the beginning of the left eye to the end of the right eye.
     /// </summary>
     public class GpuTimingCamera : MonoBehaviour
     {
@@ -24,37 +26,24 @@ namespace MixedRealityToolkit.Utilities
             Debug.Assert(timingCamera, "GpuTimingCamera component must be attached to a Camera.");
         }
 
-        private void OnPreCull()
-        {
-            NewGpuFrameTime?.Invoke((float)GpuStats.GetSampleTime(TimingTag));
-        }
-
         protected void OnPreRender()
         {
-#if UNITY_EDITOR
-            GpuStats.BeginSample(TimingTag);
-#else
-            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Left
-                || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono
-                || (UnityEngine.XR.XRSettings.enabled && UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes))
+            if (timingCamera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
             {
+                NewGpuFrameTime?.Invoke((float)GpuStats.GetSampleTime(TimingTag));
                 GpuStats.BeginSample(TimingTag);
             }
-#endif
         }
 
         protected void OnPostRender()
         {
-#if UNITY_EDITOR
-            GpuStats.EndSample();
-#else
-            if (timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right
-                || timingCamera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono
-                || (UnityEngine.XR.XRSettings.enabled && UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes))
+            if (timingCamera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Left
+                || (XRSettings.isDeviceActive
+                    && (XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes
+                        || XRSettings.eyeTextureDesc.dimension == TextureDimension.Tex2DArray)))
             {
                 GpuStats.EndSample();
             }
-#endif
         }
     }
 }
