@@ -42,7 +42,7 @@ namespace MixedRealityToolkit.Utilities
                 return GetGpuTime(eventValue);
             }
 
-            return -1;
+            return -3.0;
         }
 
         /// <summary>

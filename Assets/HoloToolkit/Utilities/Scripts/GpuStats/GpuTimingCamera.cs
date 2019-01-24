@@ -30,7 +30,12 @@ namespace MixedRealityToolkit.Utilities
         {
             if (timingCamera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
             {
-                NewGpuFrameTime?.Invoke((float)GpuStats.GetSampleTime(TimingTag));
+                var gpuFrameTime = GpuStats.GetSampleTime(TimingTag);
+                if (gpuFrameTime >= 0.0)
+                {
+                    NewGpuFrameTime?.Invoke((float)gpuFrameTime);
+                }
+
                 GpuStats.BeginSample(TimingTag);
             }
         }
