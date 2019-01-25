@@ -18,25 +18,24 @@ namespace MixedRealityToolkit.Utilities
 
         private Camera timingCamera;
 
-        public event Action<float> NewGpuFrameTime;
+        public event Action<GpuDurationResult, float> NewGpuFrameDuration;
 
         private void Start()
         {
             timingCamera = GetComponent<Camera>();
-            Debug.Assert(timingCamera, "GpuTimingCamera component must be attached to a Camera.");
+            Debug.Assert(timingCamera, "GpuTimingCamera component must be attached to a Camera");
         }
 
         protected void OnPreRender()
         {
             if (timingCamera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
             {
-                var gpuFrameTime = GpuStats.GetSampleTime(TimingTag);
-                if (gpuFrameTime >= 0.0)
-                {
-                    NewGpuFrameTime?.Invoke((float)gpuFrameTime);
-                }
+                double duration;
+                var durationResult = GpuStats.GetSampleDuration(TimingTag, out duration);
+                NewGpuFrameDuration?.Invoke(durationResult, (float)duration);
 
-                GpuStats.BeginSample(TimingTag);
+                var beginResult = GpuStats.BeginSample(TimingTag);
+                Debug.Assert(beginResult, "BeginSample() is being called without a corresponding EndSample() call");
             }
         }
 
