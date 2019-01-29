@@ -20,7 +20,7 @@ namespace MixedRealityToolkit.Utilities
 
         public event Action<GpuDurationResult, float> NewGpuFrameDuration;
 
-        private void Start()
+        protected void Start()
         {
             timingCamera = GetComponent<Camera>();
             Debug.Assert(timingCamera, "GpuTimingCamera component must be attached to a Camera");
